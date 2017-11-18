@@ -8,13 +8,15 @@ import { Observable } from 'rxjs/Observable';
   templateUrl: 'home.html'
 })
 export class HomePage {
-  songs: any;
+  songs: Observable<any[]>;
+  songsRef: AngularFireList<any>;
 
   constructor(public navCtrl: NavController,
     public alertCtrl: AlertController, 
     public afDatabase: AngularFireDatabase, 
     public actionSheetCtrl: ActionSheetController) {
-    this.songs = afDatabase.list('/songs').valueChanges();
+    this.songsRef = afDatabase.list('/songs');
+    this.songs = this.songsRef.valueChanges();
   }
 
   addSong() {
@@ -39,7 +41,7 @@ export class HomePage {
         {
           text: 'Save',
           handler: (data) => {
-            const newSongRef = this.afDatabase.list('songs').push({
+            const newSongRef = this.songsRef.push({
             });
             newSongRef.set({
               id: newSongRef.key,
@@ -82,7 +84,7 @@ export class HomePage {
   }
 
   removeSong(songId) {
-    this.afDatabase.list('songs').remove(songId);
+    this.songsRef.remove(songId);
   }
 
   updateSong(songId, songTitle) {
@@ -106,7 +108,7 @@ export class HomePage {
         {
           text: "Save",
           handler: (data) => {
-            this.afDatabase.list("songs").update(songId, {
+            this.songsRef.update(songId, {
               title: data.title
             });
           }
