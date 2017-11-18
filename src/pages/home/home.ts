@@ -84,4 +84,36 @@ export class HomePage {
   removeSong(songId) {
     this.afDatabase.list('songs').remove(songId);
   }
+
+  updateSong(songId, songTitle) {
+    let prompt = this.alertCtrl.create({
+      title: "Song Name",
+      message: "Update the name for this song",
+      inputs: [
+        {
+          name: "title",
+          placeholder: "Title",
+          value: songTitle
+        }
+      ],
+      buttons: [
+        {
+          text: "Cancel",
+          handler: () => {
+            console.log("Cancel clicked");
+          }
+        },
+        {
+          text: "Save",
+          handler: (data) => {
+            this.afDatabase.list("songs").update(songId, {
+              title: data.title
+            });
+          }
+        }
+      ]
+    });
+
+    prompt.present();
+  }
 }
