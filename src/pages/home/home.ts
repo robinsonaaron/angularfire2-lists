@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, AlertController } from 'ionic-angular';
+import { NavController, AlertController, ActionSheetController } from 'ionic-angular';
 import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
 import { Observable } from 'rxjs/Observable';
 
@@ -8,10 +8,12 @@ import { Observable } from 'rxjs/Observable';
   templateUrl: 'home.html'
 })
 export class HomePage {
-  songs: Observable<any[]>;
+  songs: any;
 
-  constructor(public navCtrl: NavController, public alertCtrl: AlertController, 
-    public afDatabase: AngularFireDatabase) {
+  constructor(public navCtrl: NavController,
+    public alertCtrl: AlertController, 
+    public afDatabase: AngularFireDatabase, 
+    public actionSheetCtrl: ActionSheetController) {
     this.songs = afDatabase.list('/songs').valueChanges();
   }
 
@@ -37,7 +39,10 @@ export class HomePage {
         {
           text: 'Save',
           handler: (data) => {
-            this.afDatabase.list('songs').push({
+            const newSongRef = this.afDatabase.list('songs').push({
+            });
+            newSongRef.set({
+              id: newSongRef.key,
               title: data.title
             });
           }
@@ -45,5 +50,38 @@ export class HomePage {
       ]
     });
     prompt.present();
+  }
+
+  showOptions(songId, songTitle) {
+    let actionSheet = this.actionSheetCtrl.create({
+      title: "What do you want to do?",
+      buttons: [
+        {
+          text: "Delete Song",
+          role: "destructive",
+          handler: () => {
+            this.removeSong(songId);
+          }
+        },
+        {
+          text: "Update Title",
+          handler: () => {
+            this.updateSong(songId, songTitle);
+          }
+        },
+        {
+          text: "Cancel",
+          role: "cancel",
+          handler: () => {
+            console.log("Cancel clicked");
+          }
+        }
+      ]
+    });
+    actionSheet.present();
+  }
+
+  removeSong(songId) {
+    this.afDatabase.list('songs').remove(songId);
   }
 }
